@@ -1,6 +1,6 @@
 <?php
 
-namespace ride\web\orm\model;
+namespace ride\web\orm\taxonomy;
 
 use ride\library\orm\model\GenericModel;
 
