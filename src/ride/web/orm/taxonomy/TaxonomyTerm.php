@@ -28,6 +28,12 @@ class TaxonomyTerm extends Data {
     public $name;
 
     /**
+     * Index for a cloud
+     * @var integer
+     */
+    public $weight;
+
+    /**
      * Gets a string representation of this term
      * @return string
      */

@@ -2,6 +2,7 @@
 
 namespace ride\web\orm\taxonomy;
 
+use ride\library\orm\definition\ModelTable;
 use ride\library\orm\model\GenericModel;
 
 /**
@@ -52,6 +53,44 @@ class TaxonomyTermModel extends GenericModel {
         }
 
         return $term;
+    }
+
+    /**
+     * Calculates the cloud weight of the provided terms
+     * @var array $terms Terms to calculate the weight for
+     * @return array Provided terms
+     */
+    public function calculateCloud(array $terms) {
+        foreach ($terms as $term) {
+            if (!$this->isValidData($term)) {
+                throw new OrmException('Could not generate cloud: invalid term provided');
+            }
+
+            $term->weight = $this->calculateCloudWeight($term);
+        }
+
+        return $terms;
+    }
+
+    /**
+     * Calculates the weight of the provided term in the cloud
+     * @param TaxonomyTerm $term
+     * @return integer Weight for the provided term
+     */
+    public function calculateCloudWeight(TaxonomyTerm $term) {
+        $weight = 0;
+
+        $models = $this->meta->getUnlinkedModels();
+        foreach ($models as $modelName) {
+            $model = $this->orm->getModel($modelName);
+
+            $query = $model->createQuery();
+            $query->addCondition('{taxonomyTerm} = %1%', $term->id);
+
+            $weight += $query->count() * $model->getMeta()->getOption('taxonomy.weight', 1);
+        }
+
+        return $weight;
     }
 
 }
