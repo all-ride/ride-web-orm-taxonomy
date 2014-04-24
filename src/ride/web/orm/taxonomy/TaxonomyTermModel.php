@@ -83,11 +83,23 @@ class TaxonomyTermModel extends GenericModel {
         $models = $this->meta->getUnlinkedModels();
         foreach ($models as $modelName) {
             $model = $this->orm->getModel($modelName);
+            $modelMeta = $model->getMeta();
+            $modelWeight = $modelMeta->getOption('taxonomy.weight', 1);
 
-            $query = $model->createQuery();
-            $query->addCondition('{taxonomyTerm} = %1%', $term->id);
+            if ($modelMeta->hasField('taxonomyTerm')) {
+                $query = $model->createQuery();
+                $query->addCondition('{taxonomyTerm} = %1%', $term->id);
 
-            $weight += $query->count() * $model->getMeta()->getOption('taxonomy.weight', 1);
+                $weight += $query->count() * $modelWeight;
+            } else {
+                $fields = $modelMeta->getRelation('TaxonomyTerm', ModelTable::BELONGS_TO);
+                foreach ($fields as $field) {
+                    $query = $model->createQuery();
+                    $query->addCondition('{' . $field->getName() . '} = %1%', $term->id);
+
+                    $weight += $query->count() * $modelWeight;
+                }
+            }
         }
 
         return $weight;
