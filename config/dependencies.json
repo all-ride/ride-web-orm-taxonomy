@@ -1,0 +1,54 @@
+{
+    "dependencies": [
+        {
+            "class": "ride\\web\\base\\menu\\MenuItem",
+            "id": "system.taxonomy",
+            "calls": [
+                {
+                    "method": "setTranslation",
+                    "arguments": [
+                        {
+                            "name": "key",
+                            "type": "scalar",
+                            "properties": {
+                                "value": "title.taxonomy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "method": "setRoute",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "scalar",
+                            "properties": {
+                                "value": "taxonomy.vocabulary.list"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "class": "ride\\web\\base\\menu\\Menu",
+            "extends": "system",
+            "id": "system",
+            "calls": [
+                {
+                    "method": "addMenuItem",
+                    "arguments": [
+                        {
+                            "name": "menuItem",
+                            "type": "dependency",
+                            "properties": {
+                                "interface": "ride\\web\\base\\menu\\MenuItem",
+                                "id": "system.taxonomy"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,4 +1,5 @@
 {
-    "title.taxonomy.terms": "Taxonomy Terms",
-    "title.taxonomy.vocabularies": "Taxonomy Vocabularies"
+    "title.taxonomy": "Taxonomy",
+    "title.terms": "Terms",
+    "title.vocabularies": "Vocabularies"
 }
