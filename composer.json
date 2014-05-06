@@ -10,14 +10,20 @@
         }
     ],
     "require": {
-        "ride/app-orm": ">=0.1.5",
-        "ride/lib-orm": ">=0.2.1",
+        "ride/app-orm-taxonomy": ">=0.1.0",
+        "ride/lib-html": ">=0.2.3",
+        "ride/lib-http": ">=0.3.3",
+        "ride/lib-orm": ">=0.2.8",
+        "ride/lib-reflection": ">=0.4.2",
+        "ride/lib-validation": ">=0.2.0",
         "ride/web-form-taxonomy": ">=0.1.0",
+        "ride/web-base": ">=0.1.0",
         "ride/web-orm": ">=0.1.0"
     },
     "autoload": {
         "psr-0": {
-            "ride\\web\\orm\\taxonomy\\": ["src/"]
+            "ride\\web\\orm\\controller\\TaxonomyController": ["src/"],
+            "ride\\web\\orm\\taxonomy\\OrmTagHandler": ["src/"]
         }
     }
 }

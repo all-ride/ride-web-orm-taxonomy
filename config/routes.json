@@ -1,0 +1,40 @@
+{
+    "routes": [
+        {
+            "path": "/admin/taxonomy",
+            "controller": "ride\\web\\orm\\controller\\TaxonomyController",
+            "action": "vocabulariesAction",
+            "id": "taxonomy.vocabulary.list"
+        },
+        {
+            "path": "/admin/taxonomy/add",
+            "controller": "ride\\web\\orm\\controller\\TaxonomyController",
+            "action": "vocabularyFormAction",
+            "id": "taxonomy.vocabulary.add"
+        },
+        {
+            "path": "/admin/taxonomy/%vocabulary%/edit",
+            "controller": "ride\\web\\orm\\controller\\TaxonomyController",
+            "action": "vocabularyFormAction",
+            "id": "taxonomy.vocabulary.edit"
+        },
+        {
+            "path": "/admin/taxonomy/%vocabulary%/terms",
+            "controller": "ride\\web\\orm\\controller\\TaxonomyController",
+            "action": "termsAction",
+            "id": "taxonomy.term.list"
+        },
+        {
+            "path": "/admin/taxonomy/%vocabulary%/terms/add",
+            "controller": "ride\\web\\orm\\controller\\TaxonomyController",
+            "action": "termFormAction",
+            "id": "taxonomy.term.add"
+        },
+        {
+            "path": "/admin/taxonomy/%vocabulary%/terms/%term%/edit",
+            "controller": "ride\\web\\orm\\controller\\TaxonomyController",
+            "action": "termFormAction",
+            "id": "taxonomy.term.edit"
+        }
+    ]
+}
