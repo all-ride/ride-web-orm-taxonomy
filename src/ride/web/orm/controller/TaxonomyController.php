@@ -250,6 +250,7 @@ class TaxonomyController extends AbstractController {
             }
         } else {
             $term = $termModel->createData();
+            $term->vocabulary = $vocabulary->id;
         }
 
         $translator = $this->getTranslator();
