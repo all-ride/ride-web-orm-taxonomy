@@ -87,7 +87,7 @@ class TaxonomyController extends AbstractController {
                 return;
             }
         } else {
-            $vocabulary = $vocabularymodel->createData();
+            $vocabulary = $vocabularymodel->createEntry();
         }
 
         $translator = $this->getTranslator();
@@ -151,7 +151,7 @@ class TaxonomyController extends AbstractController {
         $vocabularyModel = $this->orm->getTaxonomyVocabularyModel();
 
         foreach ($data as $id) {
-            $vocabulary = $vocabularyModel->getById($id, 0);
+            $vocabulary = $vocabularyModel->getById($id);
             if(!$vocabulary) {
                 continue;
             }
@@ -249,7 +249,7 @@ class TaxonomyController extends AbstractController {
                 return;
             }
         } else {
-            $term = $termModel->createData();
+            $term = $termModel->createEntry();
             $term->vocabulary = $vocabulary->id;
         }
 
@@ -320,7 +320,7 @@ class TaxonomyController extends AbstractController {
         $termModel = $this->orm->getTaxonomyTermModel();
 
         foreach ($data as $id) {
-            $term = $termModel->getById($id, 0);
+            $term = $termModel->getById($id);
             if(!$term) {
                 continue;
             }
