@@ -2,7 +2,7 @@
     "name": "ride/web-orm-taxonomy",
     "description": "Taxonomy implementation for the ORM of the Ride framework",
     "license": "MIT",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "authors": [
         {
             "name": "Joris Vandeweerd",
