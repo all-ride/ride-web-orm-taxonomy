@@ -3,7 +3,8 @@
 namespace ride\web\orm\taxonomy;
 
 use ride\library\orm\OrmManager;
-use ride\library\taxonomy\TagHandler;
+
+use ride\web\taxonomy\TagHandler;
 
 /**
  * Tag handler implementation to process tags for the ORM taxonomy backend
