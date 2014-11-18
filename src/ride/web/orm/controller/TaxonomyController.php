@@ -279,8 +279,9 @@ class TaxonomyController extends AbstractController {
         $form->addRow('parentString', 'select', array(
            'label' => $translator->translate('label.parent'),
            'options' => array(null) + $termModel->getTaxonomyTree(),
-
-
+        ));
+        $form->addRow('weight', 'integer', array(
+            'label' => $translator->translate('label.weight'),
         ));
 
         if ($term->id) {
