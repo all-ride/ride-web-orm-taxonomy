@@ -292,16 +292,13 @@ class TaxonomyController extends AbstractController {
 
         $form = $form->build();
         if ($form->isSubmitted()) {
-
             try {
-
                 $form->validate();
 
                 $term = $form->getData();
                 if ($term->parentString) {
                     $term->setParent($termModel->createProxy($term->parentString));
-                }
-                else {
+                } else {
                     $term->setParent(null);
                 }
 
@@ -356,28 +353,6 @@ class TaxonomyController extends AbstractController {
         }
 
         $this->response->setRedirect($referer);
-    }
-
-    public function ParentList($terms) {
-        $list = array();
-        foreach ($terms as $term) {
-            $item = array();
-            $item .= $this->getParent($term, $item);
-
-            $list[] = $item;
-        }
-        return $list;
-    }
-    public function getParent($term, $item) {
-        if ($term->getParent()) {
-            $item .= '/';
-            $item .= $term->getName();
-            $item = $this->getParent($term->getParent(), $item);
-           }
-        else {
-            $item .= '/' . $term->getName();
-        }
-        return $item;
     }
 
 }
