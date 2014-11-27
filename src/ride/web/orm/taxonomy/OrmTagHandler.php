@@ -12,14 +12,33 @@ use ride\web\taxonomy\TagHandler;
 class OrmTagHandler implements TagHandler {
 
     /**
+     * Instance of the ORM manager
+     * @var \ride\library\orm\OrmManager
+     */
+    protected $orm;
+
+    /**
+     * Id of the vocabulary
+     * @var string|integer
+     */
+    protected $vocabulary;
+
+    /**
+     * Code of the locale to process the tags in
+     * @var string
+     */
+    protected $locale;
+
+    /**
      * Constructs a new ORM tag handler
      * @param \ride\library\orm\OrmManager $orm Instance of the ORM manager
      * @param string|integer $vocabulary Id or slug of a vocabulary
      * @return null
      */
-    public function __construct(OrmManager $orm, $vocabulary) {
+    public function __construct(OrmManager $orm, $vocabulary, $locale = null) {
         $this->orm = $orm;
         $this->vocabulary = $vocabulary;
+        $this->locale = null;
     }
 
     /**
@@ -38,7 +57,7 @@ class OrmTagHandler implements TagHandler {
             }
 
             if (!isset($taxonomyTerms[$tag])) {
-                $taxonomyTerms[$tag] = $taxonomyTermModel->getByName($tag, $this->vocabulary);
+                $taxonomyTerms[$tag] = $taxonomyTermModel->getByName($tag, $this->vocabulary, null, $this->locale);
             }
         }
 
