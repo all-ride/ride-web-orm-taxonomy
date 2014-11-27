@@ -5,12 +5,14 @@ namespace ride\web\orm\controller;
 use ride\library\html\table\decorator\DataDecorator;
 use ride\library\http\Header;
 use ride\library\http\Response;
+use ride\library\i18n\I18n;
 use ride\library\orm\OrmManager;
 use ride\library\reflection\ReflectionHelper;
 use ride\library\validation\exception\ValidationException;
 
 use ride\web\base\controller\AbstractController;
 use ride\web\orm\table\scaffold\decorator\ActionDecorator;
+use ride\web\orm\table\scaffold\decorator\LocalizeDecorator;
 use ride\web\orm\table\scaffold\ScaffoldTable;
 
 /**
@@ -175,7 +177,18 @@ class TaxonomyController extends AbstractController {
      * @param integer $vocabulary Id of the vocabulary
      * @return null
      */
-    public function termsAction(ReflectionHelper $reflectionHelper, $vocabulary) {
+    public function termsAction(I18n $i18n, ReflectionHelper $reflectionHelper, $vocabulary, $locale = null) {
+        if (!$locale) {
+            $redirect = $this->getUrl('taxonomy.term.list.locale', array(
+                'vocabulary' => $vocabulary,
+                'locale' => $i18n->getLocale()->getCode(),
+            ));
+
+            $this->response->setRedirect($redirect);
+
+            return;
+        }
+
         $vocabularymodel = $this->orm->getTaxonomyVocabularyModel();
         $termModel = $this->orm->getTaxonomyTermModel();
 
@@ -186,31 +199,51 @@ class TaxonomyController extends AbstractController {
             return;
         }
 
-        $detailAction = $this->getUrl('taxonomy.term.edit', array('vocabulary' => $vocabulary->id, 'term' => '%id%'));
+        $locales = $i18n->getLocaleCodeList();
+        $translator = $this->getTranslator();
+
+        $detailAction = $this->getUrl('taxonomy.term.edit', array(
+            'vocabulary' => $vocabulary->id,
+            'locale' => $locale,
+            'term' => '%id%',
+        ));
         $detailAction .= '?referer=' . urlencode($this->request->getUrl());
 
         $detailDecorator = new DataDecorator($reflectionHelper, $detailAction);
         $detailDecorator->mapProperty('title', 'name');
         $detailDecorator->mapProperty('teaser', 'description');
 
-        $translator = $this->getTranslator();
+        $localizeDecorator = new LocalizeDecorator($termModel, $detailAction, $locale, $locales);
 
         $search = array('name' => 'name', 'description' => 'description');
         $order =array($translator->translate('label.name') => 'name', $translator->translate('label.weight') => 'weight');
 
         $table = new ScaffoldTable($termModel, $translator, $translator->getLocale(), $search, $order);
-        $table->getModelQuery()->addCondition('{vocabulary} = %1%', $vocabulary->id);
         $table->setPrimaryKeyField('id');
         $table->addDecorator($detailDecorator);
+        $table->addDecorator($localizeDecorator);
         $table->setPaginationOptions(array(5, 10, 25, 50, 100, 250, 500));
         $table->addAction(
             $translator->translate('button.delete'),
             array($this, 'deleteTerms'),
             $translator->translate('label.table.confirm.delete')
         );
+        $table->addAction(
+            $translator->translate('button.delete.locale'),
+            array($this, 'deleteLocalizedTerms'),
+            $translator->translate('label.table.confirm.delete')
+        );
 
-        $baseUrl = $this->getUrl('taxonomy.term.list', array('vocabulary' => $vocabulary->id));
+        $query = $table->getModelQuery();
+        $query->setLocale($locale);
+        $query->addCondition('{vocabulary} = %1%', $vocabulary->id);
+
+        $baseUrl = $this->getUrl('taxonomy.term.list.locale', array(
+            'vocabulary' => $vocabulary->id,
+            'locale' => $locale,
+        ));
         $rowsPerPage = 10;
+        $this->locale = $locale;
 
         $form = $this->processTable($table, $baseUrl, $rowsPerPage);
         if ($this->response->willRedirect() || $this->response->getView()) {
@@ -221,6 +254,8 @@ class TaxonomyController extends AbstractController {
             'form' => $form->getView(),
             'table' => $table,
             'vocabulary' => $vocabulary,
+            'locales' => $i18n->getLocaleCodeList(),
+            'locale' => $locale,
         ));
     }
 
@@ -230,7 +265,26 @@ class TaxonomyController extends AbstractController {
      * @param integer $term Id of the term to edit
      * @return null
      */
-    public function termFormAction($vocabulary, $term = null) {
+    public function termFormAction(I18n $i18n, $vocabulary, $term = null, $locale = null) {
+        if (!$locale) {
+            if ($term) {
+                $redirect = $this->getUrl('taxonomy.term.edit', array(
+                    'vocabulary' => $vocabulary,
+                    'term' => $term,
+                    'locale' => $i18n->getLocale()->getCode(),
+                ));
+            } else {
+                $redirect = $this->getUrl('taxonomy.term.add', array(
+                    'vocabulary' => $vocabulary,
+                    'locale' => $i18n->getLocale()->getCode(),
+                ));
+            }
+
+            $this->response->setRedirect($redirect);
+
+            return;
+        }
+
         $vocabularyModel = $this->orm->getTaxonomyVocabularyModel();
         $termModel = $this->orm->getTaxonomyTermModel();
 
@@ -242,7 +296,7 @@ class TaxonomyController extends AbstractController {
         }
 
         if ($term) {
-            $term = $termModel->getById($term);
+            $term = $termModel->getById($term, $locale);
             if (!$term) {
                 $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
@@ -260,6 +314,7 @@ class TaxonomyController extends AbstractController {
         if ($parent) {
             $term->parentString = $parent->getId();
         }
+
         $form = $this->createFormBuilder($term);
         $form->addRow('name', 'string', array(
             'label' => $translator->translate('label.name'),
@@ -278,13 +333,13 @@ class TaxonomyController extends AbstractController {
         ));
         $form->addRow('parentString', 'select', array(
            'label' => $translator->translate('label.parent'),
-           'options' => array(null) + $termModel->getTaxonomyTree(),
+           'options' => array(null) + $termModel->getTaxonomyTree($vocabulary, null, $locale, 'weight'),
         ));
         $form->addRow('weight', 'integer', array(
             'label' => $translator->translate('label.weight'),
         ));
 
-        if ($term->id) {
+        if ($term->getId()) {
             $form->addRow('slug', 'label', array(
                 'label' => $translator->translate('label.slug'),
             ));
@@ -296,6 +351,8 @@ class TaxonomyController extends AbstractController {
                 $form->validate();
 
                 $term = $form->getData();
+                $term->setLocale($locale);
+
                 if ($term->parentString) {
                     $term->setParent($termModel->createProxy($term->parentString));
                 } else {
@@ -307,7 +364,10 @@ class TaxonomyController extends AbstractController {
                 $this->addSuccess('success.data.saved', array('data' => $term->name));
 
                 if (!$referer) {
-                    $referer = $this->getUrl('taxonomy.term.list', array('vocabulary' => $vocabulary->id));
+                    $referer = $this->getUrl('taxonomy.term.list.locale', array(
+                        'vocabulary' => $vocabulary->getId(),
+                        'locale' => $locale,
+                    ));
                 }
 
                 $this->response->setRedirect($referer);
@@ -320,6 +380,10 @@ class TaxonomyController extends AbstractController {
 
         $this->setTemplateView('orm/taxonomy/term.form', array(
             'form' => $form->getView(),
+            'vocabulary' => $vocabulary,
+            'term' => $term,
+            'locales' => $i18n->getLocaleCodeList(),
+            'locale' => $locale,
             'referer' => $referer,
         ));
     }
@@ -337,7 +401,7 @@ class TaxonomyController extends AbstractController {
         $termModel = $this->orm->getTaxonomyTermModel();
 
         foreach ($data as $id) {
-            $term = $termModel->getById($id);
+            $term = $termModel->getById($id, $this->locale);
             if(!$term) {
                 continue;
             }
@@ -345,6 +409,37 @@ class TaxonomyController extends AbstractController {
             $termModel->delete($term);
 
             $this->addSuccess('success.data.deleted', array('data' => $term->name));
+        }
+
+        $referer = $this->request->getHeader(Header::HEADER_REFERER);
+        if (!$referer) {
+            $referer = $this->request->getUrl();
+        }
+
+        $this->response->setRedirect($referer);
+    }
+
+    /**
+     * Action to delete localized terms from the model
+     * @param array $data Array of primary keys
+     * @return null
+     */
+    public function deleteLocalizedTerms($data) {
+        if (!$data) {
+            return;
+        }
+
+        $termModel = $this->orm->getTaxonomyTermModel();
+
+        foreach ($data as $id) {
+            $term = $termModel->getById($id, $this->locale);
+            if (!$term) {
+                continue;
+            }
+
+            if ($termModel->deleteLocalized($term, $this->locale)) {
+                $this->addSuccess('success.data.deleted', array('data' => $term->getName()));
+            }
         }
 
         $referer = $this->request->getHeader(Header::HEADER_REFERER);

@@ -25,13 +25,19 @@
             "id": "taxonomy.term.list"
         },
         {
-            "path": "/admin/taxonomy/%vocabulary%/terms/add",
+            "path": "/admin/taxonomy/%vocabulary%/terms/%locale%",
+            "controller": "ride\\web\\orm\\controller\\TaxonomyController",
+            "action": "termsAction",
+            "id": "taxonomy.term.list.locale"
+        },
+        {
+            "path": "/admin/taxonomy/%vocabulary%/terms/%locale%/add",
             "controller": "ride\\web\\orm\\controller\\TaxonomyController",
             "action": "termFormAction",
             "id": "taxonomy.term.add"
         },
         {
-            "path": "/admin/taxonomy/%vocabulary%/terms/%term%/edit",
+            "path": "/admin/taxonomy/%vocabulary%/terms/%locale%/%term%/edit",
             "controller": "ride\\web\\orm\\controller\\TaxonomyController",
             "action": "termFormAction",
             "id": "taxonomy.term.edit"
