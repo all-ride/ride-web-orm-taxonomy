@@ -256,6 +256,10 @@ class TaxonomyController extends AbstractController {
         $translator = $this->getTranslator();
         $referer = $this->request->getQueryParameter('referer');
 
+        $parent = $term->getParent();
+        if ($parent) {
+            $term->parentString = $parent->getId();
+        }
         $form = $this->createFormBuilder($term);
         $form->addRow('name', 'string', array(
             'label' => $translator->translate('label.name'),
@@ -272,6 +276,14 @@ class TaxonomyController extends AbstractController {
                 'trim' => array(),
             ),
         ));
+        $form->addRow('parentString', 'select', array(
+           'label' => $translator->translate('label.parent'),
+           'options' => array(null) + $termModel->getTaxonomyTree(),
+        ));
+        $form->addRow('weight', 'integer', array(
+            'label' => $translator->translate('label.weight'),
+        ));
+
         if ($term->id) {
             $form->addRow('slug', 'label', array(
                 'label' => $translator->translate('label.slug'),
@@ -280,10 +292,18 @@ class TaxonomyController extends AbstractController {
 
         $form = $form->build();
         if ($form->isSubmitted()) {
+
             try {
+
                 $form->validate();
 
                 $term = $form->getData();
+                if ($term->parentString) {
+                    $term->setParent($termModel->createProxy($term->parentString));
+                }
+                else {
+                    $term->setParent(null);
+                }
 
                 $termModel->save($term);
 
@@ -336,6 +356,28 @@ class TaxonomyController extends AbstractController {
         }
 
         $this->response->setRedirect($referer);
+    }
+
+    public function ParentList($terms) {
+        $list = array();
+        foreach ($terms as $term) {
+            $item = array();
+            $item .= $this->getParent($term, $item);
+
+            $list[] = $item;
+        }
+        return $list;
+    }
+    public function getParent($term, $item) {
+        if ($term->getParent()) {
+            $item .= '/';
+            $item .= $term->getName();
+            $item = $this->getParent($term->getParent(), $item);
+           }
+        else {
+            $item .= '/' . $term->getName();
+        }
+        return $item;
     }
 
 }
