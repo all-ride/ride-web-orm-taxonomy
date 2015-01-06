@@ -209,7 +209,10 @@ class TaxonomyController extends AbstractController {
         ));
         $detailAction .= '?referer=' . urlencode($this->request->getUrl());
 
-        $detailDecorator = new DataDecorator($reflectionHelper, $detailAction);
+        $defaultImage = $this->getTheme() . '/img/data.png';
+        $imageUrlGenerator = $this->dependencyInjector->get('ride\\library\\image\\ImageUrlGenerator');
+
+        $detailDecorator = new DataDecorator($reflectionHelper, $detailAction, $imageUrlGenerator, $defaultImage);
         $detailDecorator->mapProperty('title', 'name');
         $detailDecorator->mapProperty('teaser', 'description');
 
@@ -330,6 +333,9 @@ class TaxonomyController extends AbstractController {
             'filters' => array(
                 'trim' => array(),
             ),
+        ));
+        $form->addRow('image', 'image', array(
+            'label' => $translator->translate('label.image'),
         ));
         $form->addRow('parentString', 'select', array(
            'label' => $translator->translate('label.parent'),
