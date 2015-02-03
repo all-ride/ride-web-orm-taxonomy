@@ -11,9 +11,11 @@ use ride\library\reflection\ReflectionHelper;
 use ride\library\validation\exception\ValidationException;
 
 use ride\web\base\controller\AbstractController;
+use ride\web\orm\form\ScaffoldComponent;
 use ride\web\orm\table\scaffold\decorator\ActionDecorator;
 use ride\web\orm\table\scaffold\decorator\LocalizeDecorator;
 use ride\web\orm\table\scaffold\ScaffoldTable;
+use ride\web\WebApplication;
 
 /**
  * Controller to manage the taxonomy terms and vocabularies
@@ -78,22 +80,28 @@ class TaxonomyController extends AbstractController {
      * @param integer $vocabulary Id of the vocabulary to edit
      * @return null
      */
-    public function vocabularyFormAction($vocabulary = null) {
-        $vocabularymodel = $this->orm->getTaxonomyVocabularyModel();
+    public function vocabularyFormAction(WebApplication $web, ReflectionHelper $reflectionHelper, $vocabulary = null) {
+        $vocabularyModel = $this->orm->getTaxonomyVocabularyModel();
 
         if ($vocabulary) {
-            $vocabulary = $vocabularymodel->getById($vocabulary);
+            $vocabulary = $vocabularyModel->getById($vocabulary);
             if (!$vocabulary) {
                 $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
                 return;
             }
         } else {
-            $vocabulary = $vocabularymodel->createEntry();
+            $vocabulary = $vocabularyModel->createEntry();
         }
 
         $translator = $this->getTranslator();
         $referer = $this->request->getQueryParameter('referer');
+
+        $vocabulary->extra = $vocabulary;
+
+        $component = new ScaffoldComponent($web, $reflectionHelper, $vocabularyModel);
+        $component->omitField('name');
+        $component->omitField('slug');
 
         $form = $this->createFormBuilder($vocabulary);
         $form->addRow('name', 'string', array(
@@ -105,6 +113,11 @@ class TaxonomyController extends AbstractController {
                 'required' => array(),
             ),
         ));
+        $form->addRow('extra', 'component', array(
+            'component' => $component,
+            'embed' => true,
+        ));
+
         if ($vocabulary->id) {
             $form->addRow('slug', 'label', array(
                 'label' => $translator->translate('label.slug'),
@@ -118,7 +131,7 @@ class TaxonomyController extends AbstractController {
 
                 $vocabulary = $form->getData();
 
-                $vocabularymodel->save($vocabulary);
+                $vocabularyModel->save($vocabulary);
 
                 $this->addSuccess('success.data.saved', array('data' => $vocabulary->name));
 
@@ -268,7 +281,7 @@ class TaxonomyController extends AbstractController {
      * @param integer $term Id of the term to edit
      * @return null
      */
-    public function termFormAction(I18n $i18n, $vocabulary, $term = null, $locale = null) {
+    public function termFormAction(I18n $i18n, WebApplication $web, ReflectionHelper $reflectionHelper, $vocabulary, $term = null, $locale = null) {
         if (!$locale) {
             if ($term) {
                 $redirect = $this->getUrl('taxonomy.term.edit', array(
@@ -318,6 +331,19 @@ class TaxonomyController extends AbstractController {
             $term->parentString = $parent->getId();
         }
 
+        // add scaffold component for extra dynamic fields
+        $term->extra = $term;
+
+        $component = new ScaffoldComponent($web, $reflectionHelper, $termModel);
+        $component->setLocale($locale);
+        $component->omitField('vocabulary');
+        $component->omitField('name');
+        $component->omitField('description');
+        $component->omitField('image');
+        $component->omitField('parent');
+        $component->omitField('weight');
+        $component->omitField('slug');
+
         $form = $this->createFormBuilder($term);
         $form->addRow('name', 'string', array(
             'label' => $translator->translate('label.name'),
@@ -343,6 +369,10 @@ class TaxonomyController extends AbstractController {
         ));
         $form->addRow('weight', 'integer', array(
             'label' => $translator->translate('label.weight'),
+        ));
+        $form->addRow('extra', 'component', array(
+            'component' => $component,
+            'embed' => true,
         ));
 
         if ($term->getId()) {
