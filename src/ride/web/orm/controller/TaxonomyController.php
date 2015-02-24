@@ -337,38 +337,13 @@ class TaxonomyController extends AbstractController {
         $component = new ScaffoldComponent($web, $reflectionHelper, $termModel);
         $component->setLocale($locale);
         $component->omitField('vocabulary');
-        $component->omitField('name');
-        $component->omitField('description');
-        $component->omitField('image');
         $component->omitField('parent');
-        $component->omitField('weight');
         $component->omitField('slug');
 
         $form = $this->createFormBuilder($term);
-        $form->addRow('name', 'string', array(
-            'label' => $translator->translate('label.name'),
-            'filters' => array(
-                'trim' => array(),
-            ),
-            'validators' => array(
-                'required' => array(),
-            ),
-        ));
-        $form->addRow('description', 'text', array(
-            'label' => $translator->translate('label.description'),
-            'filters' => array(
-                'trim' => array(),
-            ),
-        ));
-        $form->addRow('image', 'image', array(
-            'label' => $translator->translate('label.image'),
-        ));
         $form->addRow('parentString', 'select', array(
            'label' => $translator->translate('label.parent'),
            'options' => array(null) + $termModel->getTaxonomyTree($vocabulary, null, $locale, 'weight'),
-        ));
-        $form->addRow('weight', 'integer', array(
-            'label' => $translator->translate('label.weight'),
         ));
         $form->addRow('extra', 'component', array(
             'component' => $component,
