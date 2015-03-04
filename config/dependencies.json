@@ -32,8 +32,8 @@
         },
         {
             "class": "ride\\web\\base\\menu\\Menu",
-            "extends": "system",
-            "id": "system",
+            "extends": "content",
+            "id": "content",
             "calls": [
                 {
                     "method": "addMenuItem",
