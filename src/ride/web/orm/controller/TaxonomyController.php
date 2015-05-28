@@ -99,7 +99,7 @@ class TaxonomyController extends AbstractController {
 
         $vocabulary->extra = $vocabulary;
 
-        $component = new ScaffoldComponent($web, $reflectionHelper, $vocabularyModel);
+        $component = new ScaffoldComponent($web, $reflectionHelper, $this->getSecurityManager(), $vocabularyModel);
         $component->omitField('name');
         $component->omitField('slug');
 
@@ -334,7 +334,7 @@ class TaxonomyController extends AbstractController {
         // add scaffold component for extra dynamic fields
         $term->extra = $term;
 
-        $component = new ScaffoldComponent($web, $reflectionHelper, $termModel);
+        $component = new ScaffoldComponent($web, $reflectionHelper, $this->getSecurityManager(), $termModel);
         $component->setLocale($locale);
         $component->omitField('vocabulary');
         $component->omitField('parent');
