@@ -1,5 +1,6 @@
 {
     "title.taxonomy": "Taxonomy",
     "title.terms": "Terms",
-    "title.vocabularies": "Vocabularies"
+    "title.vocabularies": "Vocabularies",
+    "label.term.next": "Add another"
 }

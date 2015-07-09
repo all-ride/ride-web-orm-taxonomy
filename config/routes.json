@@ -41,6 +41,12 @@
             "controller": "ride\\web\\orm\\controller\\TaxonomyController",
             "action": "termFormAction",
             "id": "taxonomy.term.edit"
+        },
+        {
+            "path": "/admin/taxonomy/%vocabulary%/terms/%locale%/add",
+            "controller": "ride\\web\\orm\\controller\\TaxonomyController",
+            "action": "termFormAction",
+            "id": "taxonomy.term.add.more"
         }
     ]
 }
