@@ -381,24 +381,12 @@ class TaxonomyController extends AbstractController {
 
                 $this->addSuccess('success.data.saved', array('data' => $term->name));
 
-                $addNext = $this->getUrl('taxonomy.term.add', array(
-                    'vocabulary' => $vocabulary->id,
-                    'locale' => $locale,
-                    'term' => '%id%',
-                ));
-
-                $data = $form->getData();
-                if ($data->submit = "new") {
-                    $this->response->setRedirect($addNext);
-                    return;
-                }
                 if (!$referer) {
                     $referer = $this->getUrl('taxonomy.term.list.locale', array(
                         'vocabulary' => $vocabulary->getId(),
                         'locale' => $locale,
                     ));
                 }
-
 
                 $this->response->setRedirect($referer);
 
