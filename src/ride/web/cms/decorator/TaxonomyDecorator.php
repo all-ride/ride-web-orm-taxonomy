@@ -1,6 +1,6 @@
 <?php
 
-namespace ride\library\decorator;
+namespace ride\web\cms\decorator;
 
 use ride\library\orm\OrmManager;
 use ride\web\orm\taxonomy\OrmTagHandler;
