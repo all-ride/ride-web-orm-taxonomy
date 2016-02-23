@@ -10,6 +10,8 @@ use ride\library\orm\OrmManager;
 use ride\library\reflection\ReflectionHelper;
 use ride\library\validation\exception\ValidationException;
 
+use ride\service\OrmService;
+
 use ride\web\base\controller\AbstractController;
 use ride\web\orm\form\ScaffoldComponent;
 use ride\web\orm\table\scaffold\decorator\ActionDecorator;
@@ -80,7 +82,7 @@ class TaxonomyController extends AbstractController {
      * @param integer $vocabulary Id of the vocabulary to edit
      * @return null
      */
-    public function vocabularyFormAction(WebApplication $web, ReflectionHelper $reflectionHelper, $vocabulary = null) {
+    public function vocabularyFormAction(WebApplication $web, OrmService $ormService, $vocabulary = null) {
         $vocabularyModel = $this->orm->getTaxonomyVocabularyModel();
 
         if ($vocabulary) {
@@ -99,7 +101,7 @@ class TaxonomyController extends AbstractController {
 
         $vocabulary->extra = $vocabulary;
 
-        $component = new ScaffoldComponent($web, $reflectionHelper, $this->getSecurityManager(), $vocabularyModel);
+        $component = new ScaffoldComponent($web, $this->getSecurityManager(), $ormService, $vocabularyModel);
         $component->omitField('name');
         $component->omitField('slug');
 
@@ -288,7 +290,7 @@ class TaxonomyController extends AbstractController {
      * @param integer $term Id of the term to edit
      * @return null
      */
-    public function termFormAction(I18n $i18n, WebApplication $web, ReflectionHelper $reflectionHelper, $vocabulary, $term = null, $locale = null) {
+    public function termFormAction(I18n $i18n, WebApplication $web, OrmService $ormService, $vocabulary, $term = null, $locale = null) {
         if (!$locale) {
             if ($term) {
                 $redirect = $this->getUrl('taxonomy.term.edit', array(
@@ -341,7 +343,7 @@ class TaxonomyController extends AbstractController {
         // add scaffold component for extra dynamic fields
         $term->extra = $term;
 
-        $component = new ScaffoldComponent($web, $reflectionHelper, $this->getSecurityManager(), $termModel);
+        $component = new ScaffoldComponent($web, $this->getSecurityManager(), $ormService, $termModel);
         $component->setLocale($locale);
         $component->omitField('vocabulary');
         $component->omitField('parent');
