@@ -2,5 +2,7 @@
     "title.taxonomy": "Taxonomie",
     "title.terms": "Termen",
     "title.vocabularies": "Woordenboeken",
-    "label.term.next": "Meer toevoegen"
+    "label.term.next": "Meer toevoegen",
+    "permission.taxonomy.vocabularies.add": "Recht om woordenboeken toe te voegen",
+    "permission.taxonomy.vocabularies.remove": "Recht om woordenboeken te verwijderen"
 }
