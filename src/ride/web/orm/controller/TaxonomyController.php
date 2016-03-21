@@ -38,7 +38,7 @@ class TaxonomyController extends AbstractController {
      * @return null
      */
     public function vocabulariesAction(ReflectionHelper $reflectionHelper) {
-        $vocabularymodel = $this->orm->getTaxonomyVocabularyModel();
+        $vocabularyModel = $this->orm->getTaxonomyVocabularyModel();
 
         $translator = $this->getTranslator();
 
@@ -52,16 +52,18 @@ class TaxonomyController extends AbstractController {
 
         $termsDecorator = new ActionDecorator($translator->translate('title.terms'), $termsAction, null, null, $reflectionHelper);
 
-        $table = new ScaffoldTable($vocabularymodel, $translator, $translator->getLocale(), false, false);
+        $table = new ScaffoldTable($vocabularyModel, $translator, $translator->getLocale(), false, false);
         $table->setPrimaryKeyField('id');
         $table->getModelQuery()->addOrderBy('{name} ASC');
         $table->addDecorator($detailDecorator);
         $table->addDecorator($termsDecorator);
-        $table->addAction(
-            $translator->translate('button.delete'),
-            array($this, 'deleteVocabularies'),
-            $translator->translate('label.table.confirm.delete')
-        );
+        if ($this->getSecurityManager()->isPermissionGranted('taxonomy.vocabularies.remove')) {
+            $table->addAction(
+                $translator->translate('button.delete'),
+                array($this, 'deleteVocabularies'),
+                $translator->translate('label.table.confirm.delete')
+            );
+        }
 
         $baseUrl = $this->getUrl('taxonomy.vocabulary.list');
         $rowsPerPage = 10;
@@ -70,10 +72,15 @@ class TaxonomyController extends AbstractController {
         if ($this->response->willRedirect() || $this->response->getView()) {
             return;
         }
+        $vocabularyUrl = null;
+        if ($this->getSecurityManager()->isPermissionGranted('taxonomy.vocabularies.add')) {
+            $vocabularyUrl = $this->getUrl('taxonomy.vocabulary.add') . '?referer=' . $this->request->getUrl();
+        }
 
         $this->setTemplateView('orm/taxonomy/vocabularies', array(
             'form' => $form->getView(),
             'table' => $table,
+            'vocabularyUrl' => $vocabularyUrl
         ));
     }
 
@@ -83,6 +90,13 @@ class TaxonomyController extends AbstractController {
      * @return null
      */
     public function vocabularyFormAction(WebApplication $web, OrmService $ormService, $vocabulary = null) {
+        if (!$this->getSecurityManager()->isPermissionGranted('taxonomy.vocabularies.add')) {
+            $this->addWarning('warning.permission.vocabulary.add');
+            $this->response->setForbidden();
+
+            return;
+        }
+
         $vocabularyModel = $this->orm->getTaxonomyVocabularyModel();
 
         if ($vocabulary) {
@@ -162,6 +176,11 @@ class TaxonomyController extends AbstractController {
      */
     public function deleteVocabularies($data) {
         if (!$data) {
+            return;
+        }
+
+        if (!$this->getSecurityManager()->isPermissionGranted('taxonomy.vocabularies.remove')) {
+            $this->addWarning('warning.permission.vocabulary.remove');
             return;
         }
 
