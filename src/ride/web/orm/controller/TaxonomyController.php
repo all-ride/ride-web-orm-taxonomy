@@ -287,19 +287,12 @@ class TaxonomyController extends AbstractController {
             return;
         }
 
-        $addNext = $this->getUrl('taxonomy.term.add', array(
-            'vocabulary' => $vocabulary->id,
-            'locale' => $locale,
-            'term' => '%id%',
-        ));
-
         $this->setTemplateView('orm/taxonomy/terms', array(
             'form' => $form->getView(),
             'table' => $table,
             'vocabulary' => $vocabulary,
             'locales' => $i18n->getLocaleCodeList(),
             'locale' => $locale,
-            'addNext' => $addNext
         ));
     }
 
