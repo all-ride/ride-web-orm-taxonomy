@@ -3,8 +3,8 @@
 namespace ride\web\orm\controller;
 
 use ride\library\html\table\decorator\DataDecorator;
+use ride\library\html\table\decorator\StaticDecorator;
 use ride\library\http\Header;
-use ride\library\http\Response;
 use ride\library\i18n\I18n;
 use ride\library\orm\OrmManager;
 use ride\library\reflection\ReflectionHelper;
@@ -55,7 +55,7 @@ class TaxonomyController extends AbstractController {
         $table = new ScaffoldTable($vocabularyModel, $translator, $translator->getLocale(), false, false);
         $table->setPrimaryKeyField('id');
         $table->getModelQuery()->addOrderBy('{name} ASC');
-        $table->addDecorator($detailDecorator);
+        $table->addDecorator($detailDecorator, new StaticDecorator($translator->translate('label.vocabulary')));
         $table->addDecorator($termsDecorator);
         if ($this->getSecurityManager()->isPermissionGranted('taxonomy.vocabularies.remove')) {
             $table->addAction(
@@ -72,9 +72,10 @@ class TaxonomyController extends AbstractController {
         if ($this->response->willRedirect() || $this->response->getView()) {
             return;
         }
+
         $vocabularyUrl = null;
         if ($this->getSecurityManager()->isPermissionGranted('taxonomy.vocabularies.add')) {
-            $vocabularyUrl = $this->getUrl('taxonomy.vocabulary.add') . '?referer=' . $this->request->getUrl();
+            $vocabularyUrl = $this->getUrl('taxonomy.vocabulary.add') . '?referer=' . urlencode($this->request->getUrl());
         }
 
         $this->setTemplateView('orm/taxonomy/vocabularies', array(
@@ -91,10 +92,7 @@ class TaxonomyController extends AbstractController {
      */
     public function vocabularyFormAction(WebApplication $web, OrmService $ormService, $vocabulary = null) {
         if (!$this->getSecurityManager()->isPermissionGranted('taxonomy.vocabularies.add')) {
-            $this->addWarning('warning.permission.vocabulary.add');
-            $this->response->setForbidden();
-
-            return;
+            throw new UnauthorizedException();
         }
 
         $vocabularyModel = $this->orm->getTaxonomyVocabularyModel();
@@ -102,7 +100,7 @@ class TaxonomyController extends AbstractController {
         if ($vocabulary) {
             $vocabulary = $vocabularyModel->getById($vocabulary);
             if (!$vocabulary) {
-                $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
+                $this->response->setNotFound();
 
                 return;
             }
@@ -166,6 +164,7 @@ class TaxonomyController extends AbstractController {
         $this->setTemplateView('orm/taxonomy/vocabulary.form', array(
             'form' => $form->getView(),
             'referer' => $referer,
+            'vocabulary' => $vocabulary,
         ));
     }
 
@@ -180,15 +179,14 @@ class TaxonomyController extends AbstractController {
         }
 
         if (!$this->getSecurityManager()->isPermissionGranted('taxonomy.vocabularies.remove')) {
-            $this->addWarning('warning.permission.vocabulary.remove');
-            return;
+            throw new UnauthorizedException();
         }
 
         $vocabularyModel = $this->orm->getTaxonomyVocabularyModel();
 
         foreach ($data as $id) {
             $vocabulary = $vocabularyModel->getById($id);
-            if(!$vocabulary) {
+            if (!$vocabulary) {
                 continue;
             }
 
@@ -228,7 +226,7 @@ class TaxonomyController extends AbstractController {
 
         $vocabulary = $vocabularymodel->getById($vocabulary);
         if (!$vocabulary) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
+            $this->response->setNotFound();
 
             return;
         }
@@ -257,7 +255,7 @@ class TaxonomyController extends AbstractController {
 
         $table = new ScaffoldTable($termModel, $translator, $translator->getLocale(), $search, $order);
         $table->setPrimaryKeyField('id');
-        $table->addDecorator($detailDecorator);
+        $table->addDecorator($detailDecorator, new StaticDecorator($translator->translate('label.term')));
         $table->addDecorator($localizeDecorator);
         $table->setPaginationOptions(array(5, 10, 25, 50, 100, 250, 500));
         $table->addAction(
@@ -327,7 +325,7 @@ class TaxonomyController extends AbstractController {
 
         $vocabulary = $vocabularyModel->getById($vocabulary);
         if (!$vocabulary) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
+            $this->response->setNotFound();
 
             return;
         }
@@ -335,7 +333,7 @@ class TaxonomyController extends AbstractController {
         if ($term) {
             $term = $termModel->getById($term, $locale);
             if (!$term) {
-                $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
+                $this->response->setNotFound();
 
                 return;
             }

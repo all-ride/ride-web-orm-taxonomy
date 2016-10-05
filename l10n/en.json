@@ -1,10 +1,10 @@
 {
+    "label.parent": "Parent",
+    "label.term": "Term",
+    "label.vocabulary": "Vocabulary",
+    "permission.taxonomy.vocabularies.add": "Add vocabularies",
+    "permission.taxonomy.vocabularies.remove": "Remove vocabularies",
     "title.taxonomy": "Taxonomy",
     "title.terms": "Terms",
-    "title.vocabularies": "Vocabularies",
-    "label.term.next": "Add another",
-    "warning.permission.vocabulary.remove": "You are not allowed to remove vocabularies.",
-    "warning.permission.vocabulary.add": "You are not allowed to add vocabularies.",
-    "permission.taxonomy.vocabularies.add": "Permission to add vocabularies",
-    "permission.taxonomy.vocabularies.remove": "Permission to remove vocabularies"
+    "title.vocabularies": "Vocabularies"
 }
