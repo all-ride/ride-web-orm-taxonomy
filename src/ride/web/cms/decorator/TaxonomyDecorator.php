@@ -1,8 +1,9 @@
 <?php
 
-namespace ride\library\decorator;
+namespace ride\web\cms\decorator;
 
 use ride\library\orm\OrmManager;
+
 use ride\web\orm\taxonomy\OrmTagHandler;
 
 /**
@@ -32,17 +33,18 @@ class TaxonomyDecorator implements Decorator {
         if (!is_string($value)) {
             return $value;
         } else if (empty($value)) {
-            return $this->delimiter == false ? null : array();
+            return $this->delimiter === false ? null : array();
         }
 
-        if ($this->delimiter != false) {
+        if ($this->delimiter !== false) {
             $values = explode($this->delimiter, $value);
 
             return $this->ormTagHandler->processTags($values);
-        }
-        $tags = $this->ormTagHandler->processTags(array($value));
+        } else {
+            $tags = $this->ormTagHandler->processTags(array($value));
 
-        return $tags[$value];
+            return $tags[$value];
+        }
     }
 
 }
