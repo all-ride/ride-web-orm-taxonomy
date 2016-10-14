@@ -8,6 +8,7 @@ use ride\library\http\Header;
 use ride\library\i18n\I18n;
 use ride\library\orm\OrmManager;
 use ride\library\reflection\ReflectionHelper;
+use ride\library\security\exception\UnauthorizedException;
 use ride\library\validation\exception\ValidationException;
 
 use ride\service\OrmService;
